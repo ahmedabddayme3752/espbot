@@ -5,19 +5,19 @@ services:
     env: docker
     plan: starter
     image: mysql:8.0
-    command: --default-authentication-plugin=mysql_native_password --bind-address=0.0.0.0
+    command: --default-authentication-plugin=mysql_native_password
     disk:
       name: mysql-data
       mountPath: /var/lib/mysql
       sizeGB: 10
     envVars:
-      - key: MYSQL_ROOT_PASSWORD
-        generateValue: true
       - key: MYSQL_DATABASE
         value: wordpress
       - key: MYSQL_USER
         value: wordpress
       - key: MYSQL_PASSWORD
+        generateValue: true
+      - key: MYSQL_ROOT_PASSWORD
         generateValue: true
 
   # WordPress Service
@@ -32,7 +32,7 @@ services:
         fromService:
           type: pserv
           name: mysql
-          property: host
+          property: hostport
       - key: WORDPRESS_DB_USER
         value: wordpress
       - key: WORDPRESS_DB_PASSWORD
