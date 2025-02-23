@@ -18,7 +18,11 @@ $db_password = getenv('WORDPRESS_DB_PASSWORD');
 $db_name = getenv('WORDPRESS_DB_NAME');
 
 // Fallback values if environment variables are not set
-if (empty($db_host)) $db_host = 'mysql-db:3306';
+if (empty($db_host)) {
+    // Try to get the private domain from Render's environment
+    $private_domain = getenv('RENDER_SERVICE_DOMAIN');
+    $db_host = $private_domain ? $private_domain . ':3306' : 'mysql-db.svc.internal:3306';
+}
 if (empty($db_user)) $db_user = 'wordpress';
 if (empty($db_password)) $db_password = 'MySecurePass123!@#';
 if (empty($db_name)) $db_name = 'wordpress';
