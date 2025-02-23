@@ -1,45 +1,22 @@
-FROM php:8.1-apache
+FROM wordpress:6.4-apache
 
-# Install system dependencies
-RUN apt-get update && apt-get install -y \
-    libpng-dev \
-    libjpeg-dev \
-    libfreetype6-dev \
-    zip \
-    unzip \
-    wget \
-    && docker-php-ext-configure gd --with-freetype --with-jpeg \
-    && docker-php-ext-install gd mysqli pdo pdo_mysql
+# Install required PHP extensions
+RUN docker-php-ext-install mysqli pdo pdo_mysql
 
-# Enable Apache modules
-RUN a2enmod rewrite
+# Download and install a default theme (Twenty Twenty-Four)
+RUN mkdir -p /usr/src/wordpress/wp-content/themes/ \
+    && curl -o /tmp/twentytwentyfour.zip https://downloads.wordpress.org/theme/twentytwentyfour.1.0.zip \
+    && unzip /tmp/twentytwentyfour.zip -d /usr/src/wordpress/wp-content/themes/ \
+    && rm /tmp/twentytwentyfour.zip
 
-# Configure Apache
-RUN echo "ServerName localhost" >> /etc/apache2/apache2.conf
-RUN echo "<Directory /var/www/html/>\n\
-    Options Indexes FollowSymLinks\n\
-    AllowOverride All\n\
-    Require all granted\n\
-</Directory>" >> /etc/apache2/apache2.conf
+# Copy wp-config-render.php to the container
+COPY wp-config-render.php /usr/src/wordpress/wp-config-render.php
 
-# Set working directory
-WORKDIR /var/www/html
-
-# Download and extract WordPress
-RUN wget https://wordpress.org/latest.tar.gz && \
-    tar -xzf latest.tar.gz --strip-components=1 && \
-    rm latest.tar.gz
-
-# Copy our custom content
-COPY . /var/www/html/
-
-# Move wp-config-render.php to wp-config.php
-RUN if [ -f "/var/www/html/wp-config-render.php" ]; then \
-    mv /var/www/html/wp-config-render.php /var/www/html/wp-config.php; \
-    fi
+# Set up wp-config.php during container startup
+RUN mv /usr/src/wordpress/wp-config-render.php /usr/src/wordpress/wp-config.php
 
 # Set permissions
-RUN chown -R www-data:www-data /var/www/html
+RUN chown -R www-data:www-data /usr/src/wordpress
 
-# Expose port 80
-EXPOSE 80
+# Use the default apache configuration from the WordPress image
+CMD ["apache2-foreground"]

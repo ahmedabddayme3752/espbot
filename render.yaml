@@ -39,6 +39,10 @@ services:
         value: wordpress
       - key: WORDPRESS_DEBUG
         value: "1"
+      - key: WP_HOME
+        value: https://espbot.onrender.com
+      - key: WP_SITEURL
+        value: https://espbot.onrender.com
     disk:
       name: wordpress-data
       mountPath: /var/www/html/wp-content
