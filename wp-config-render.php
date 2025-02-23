@@ -12,23 +12,54 @@ error_log("DB_USER: " . getenv('WORDPRESS_DB_USER'));
 error_log("DB_NAME: " . getenv('WORDPRESS_DB_NAME'));
 
 // ** Database settings - You can get this info from your web host ** //
-define('DB_NAME', getenv('WORDPRESS_DB_NAME'));
-define('DB_USER', getenv('WORDPRESS_DB_USER'));
-define('DB_PASSWORD', getenv('WORDPRESS_DB_PASSWORD'));
-define('DB_HOST', getenv('WORDPRESS_DB_HOST'));
+$db_host = getenv('WORDPRESS_DB_HOST');
+$db_user = getenv('WORDPRESS_DB_USER');
+$db_password = getenv('WORDPRESS_DB_PASSWORD');
+$db_name = getenv('WORDPRESS_DB_NAME');
+
+// Fallback values if environment variables are not set
+if (empty($db_host)) $db_host = 'mysql-db:3306';
+if (empty($db_user)) $db_user = 'wordpress';
+if (empty($db_password)) $db_password = 'MySecurePass123!@#';
+if (empty($db_name)) $db_name = 'wordpress';
+
+define('DB_NAME', $db_name);
+define('DB_USER', $db_user);
+define('DB_PASSWORD', $db_password);
+define('DB_HOST', $db_host);
 define('DB_CHARSET', 'utf8');
 define('DB_COLLATE', '');
 
-// Try to connect to the database
-$mysqli = new mysqli(DB_HOST, DB_USER, DB_PASSWORD, DB_NAME);
+// Try to connect to the database with retry logic
+$max_retries = 5;
+$retry_interval = 2;
+$connected = false;
 
-// Check connection
-if ($mysqli->connect_error) {
-    error_log("Failed to connect to MySQL: " . $mysqli->connect_error);
-    error_log("Connection info - Host: " . DB_HOST . ", User: " . DB_USER . ", Database: " . DB_NAME);
+for ($i = 0; $i < $max_retries; $i++) {
+    try {
+        error_log("Attempt " . ($i + 1) . " to connect to MySQL at " . DB_HOST);
+        $mysqli = new mysqli(DB_HOST, DB_USER, DB_PASSWORD, DB_NAME);
+        
+        if ($mysqli->connect_error) {
+            error_log("Failed to connect to MySQL: " . $mysqli->connect_error);
+            if ($i < $max_retries - 1) {
+                error_log("Waiting " . $retry_interval . " seconds before retry...");
+                sleep($retry_interval);
+                continue;
+            }
+        } else {
+            error_log("Successfully connected to MySQL");
+            $connected = true;
+            $mysqli->close();
+            break;
+        }
+    } catch (Exception $e) {
+        error_log("Exception while connecting to MySQL: " . $e->getMessage());
+        if ($i < $max_retries - 1) {
+            sleep($retry_interval);
+        }
+    }
 }
-
-$mysqli->close();
 
 // Authentication Unique Keys and Salts
 define('AUTH_KEY',         '4K]D-0~+K-OL|9+6G+K9Hs4jH~1x%WV-kEu7Xt7|LQ6Y5Uc9N');
