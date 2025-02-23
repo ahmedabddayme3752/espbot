@@ -33,6 +33,11 @@ RUN wget https://wordpress.org/latest.tar.gz && \
 # Copy our custom content
 COPY . /var/www/html/
 
+# Move wp-config-render.php to wp-config.php
+RUN if [ -f "/var/www/html/wp-config-render.php" ]; then \
+    mv /var/www/html/wp-config-render.php /var/www/html/wp-config.php; \
+    fi
+
 # Set permissions
 RUN chown -R www-data:www-data /var/www/html
 

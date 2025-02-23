@@ -8,14 +8,14 @@ define( 'DB_CHARSET', 'utf8' );
 define( 'DB_COLLATE', '' );
 
 // Authentication Unique Keys and Salts
-define('AUTH_KEY',         'put your unique phrase here');
-define('SECURE_AUTH_KEY',  'put your unique phrase here');
-define('LOGGED_IN_KEY',    'put your unique phrase here');
-define('NONCE_KEY',        'put your unique phrase here');
-define('AUTH_SALT',        'put your unique phrase here');
-define('SECURE_AUTH_SALT', 'put your unique phrase here');
-define('LOGGED_IN_SALT',   'put your unique phrase here');
-define('NONCE_SALT',       'put your unique phrase here');
+define('AUTH_KEY',         '4K]D-0~+K-OL|9+6G+K9Hs4jH~1x%WV-kEu7Xt7|LQ6Y5Uc9N');
+define('SECURE_AUTH_KEY',  'XmK8|4R+K-s5H~1x%WV-kEu7Xt7|LQ6Y5Uc9NjH~1x%WV-kE');
+define('LOGGED_IN_KEY',    'K9Hs4jH~1x%WV-kEu7Xt7|LQ6Y5Uc9NjH~1x%WV-kEu7Xt7|');
+define('NONCE_KEY',        'H~1x%WV-kEu7Xt7|LQ6Y5Uc9NjH~1x%WV-kEu7Xt7|LQ6Y5U');
+define('AUTH_SALT',        'kEu7Xt7|LQ6Y5Uc9NjH~1x%WV-kEu7Xt7|LQ6Y5Uc9NjH~1x');
+define('SECURE_AUTH_SALT', 'Xt7|LQ6Y5Uc9NjH~1x%WV-kEu7Xt7|LQ6Y5Uc9NjH~1x%WV');
+define('LOGGED_IN_SALT',   'LQ6Y5Uc9NjH~1x%WV-kEu7Xt7|LQ6Y5Uc9NjH~1x%WV-kEu');
+define('NONCE_SALT',       'Uc9NjH~1x%WV-kEu7Xt7|LQ6Y5Uc9NjH~1x%WV-kEu7Xt7|');
 
 $table_prefix = 'wp_';
 
