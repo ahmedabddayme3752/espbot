@@ -18,35 +18,40 @@ $db_password = getenv('WORDPRESS_DB_PASSWORD');
 $db_name = getenv('WORDPRESS_DB_NAME');
 
 // Fallback values if environment variables are not set
-if (empty($db_host)) $db_host = 'mysql-db.internal:3306';
+if (empty($db_host)) $db_host = 'mysql-db:3306';
 if (empty($db_user)) $db_user = 'wordpress';
 if (empty($db_password)) $db_password = 'MySecurePass123!@#';
 if (empty($db_name)) $db_name = 'wordpress';
 
+// Parse host and port from DB_HOST
+$host_parts = explode(':', $db_host);
+$host = $host_parts[0];
+$port = isset($host_parts[1]) ? intval($host_parts[1]) : 3306;
+
+error_log("Parsed connection details:");
+error_log("Host: " . $host);
+error_log("Port: " . $port);
+error_log("User: " . $db_user);
+error_log("Database: " . $db_name);
+
 define('DB_NAME', $db_name);
 define('DB_USER', $db_user);
 define('DB_PASSWORD', $db_password);
-define('DB_HOST', $db_host);
+define('DB_HOST', $host);
 define('DB_CHARSET', 'utf8');
 define('DB_COLLATE', '');
 
 // Try to connect to the database with retry logic
 $max_retries = 30;  // Increased retries for initial setup
-$retry_interval = 2;
+$retry_interval = 5; // Increased interval between retries
 $connected = false;
 
 for ($i = 0; $i < $max_retries; $i++) {
     try {
-        error_log("Attempt " . ($i + 1) . " to connect to MySQL at " . DB_HOST);
+        error_log("Attempt " . ($i + 1) . " to connect to MySQL");
+        error_log("Connection params - Host: " . $host . ", Port: " . $port . ", User: " . $db_user . ", Database: " . $db_name);
         
-        // Parse host and port
-        $host_parts = explode(':', DB_HOST);
-        $host = $host_parts[0];
-        $port = isset($host_parts[1]) ? $host_parts[1] : 3306;
-        
-        error_log("Trying to connect to host: $host, port: $port");
-        
-        $mysqli = new mysqli($host, DB_USER, DB_PASSWORD, DB_NAME, $port);
+        $mysqli = new mysqli($host, $db_user, $db_password, $db_name, $port);
         
         if ($mysqli->connect_error) {
             error_log("Failed to connect to MySQL: " . $mysqli->connect_error);

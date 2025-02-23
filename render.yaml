@@ -30,13 +30,25 @@ services:
     healthCheckPath: /
     envVars:
       - key: WORDPRESS_DB_HOST
-        value: mysql-db.internal:3306
+        fromService:
+          type: pserv
+          name: mysql-db
+          port: 3306
       - key: WORDPRESS_DB_USER
-        value: wordpress
+        fromService:
+          type: pserv
+          name: mysql-db
+          envKey: MYSQL_USER
       - key: WORDPRESS_DB_PASSWORD
-        value: MySecurePass123!@#
+        fromService:
+          type: pserv
+          name: mysql-db
+          envKey: MYSQL_PASSWORD
       - key: WORDPRESS_DB_NAME
-        value: wordpress
+        fromService:
+          type: pserv
+          name: mysql-db
+          envKey: MYSQL_DATABASE
       - key: WORDPRESS_DEBUG
         value: "1"
     disk:
