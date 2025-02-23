@@ -18,7 +18,7 @@ $db_password = getenv('WORDPRESS_DB_PASSWORD');
 $db_name = getenv('WORDPRESS_DB_NAME');
 
 // Fallback values if environment variables are not set
-if (empty($db_host)) $db_host = 'mysql-db:3306';
+if (empty($db_host)) $db_host = 'mysql-db.internal:3306';
 if (empty($db_user)) $db_user = 'wordpress';
 if (empty($db_password)) $db_password = 'MySecurePass123!@#';
 if (empty($db_name)) $db_name = 'wordpress';
@@ -31,14 +31,22 @@ define('DB_CHARSET', 'utf8');
 define('DB_COLLATE', '');
 
 // Try to connect to the database with retry logic
-$max_retries = 5;
+$max_retries = 30;  // Increased retries for initial setup
 $retry_interval = 2;
 $connected = false;
 
 for ($i = 0; $i < $max_retries; $i++) {
     try {
         error_log("Attempt " . ($i + 1) . " to connect to MySQL at " . DB_HOST);
-        $mysqli = new mysqli(DB_HOST, DB_USER, DB_PASSWORD, DB_NAME);
+        
+        // Parse host and port
+        $host_parts = explode(':', DB_HOST);
+        $host = $host_parts[0];
+        $port = isset($host_parts[1]) ? $host_parts[1] : 3306;
+        
+        error_log("Trying to connect to host: $host, port: $port");
+        
+        $mysqli = new mysqli($host, DB_USER, DB_PASSWORD, DB_NAME, $port);
         
         if ($mysqli->connect_error) {
             error_log("Failed to connect to MySQL: " . $mysqli->connect_error);

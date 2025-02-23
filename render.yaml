@@ -19,6 +19,7 @@ services:
         value: MySecurePass123!@#
       - key: MYSQL_ROOT_PASSWORD
         value: RootPass123!@#
+    ipAllowList: []
 
   # WordPress Service
   - type: web
@@ -29,7 +30,7 @@ services:
     healthCheckPath: /
     envVars:
       - key: WORDPRESS_DB_HOST
-        value: mysql-db:3306
+        value: mysql-db.internal:3306
       - key: WORDPRESS_DB_USER
         value: wordpress
       - key: WORDPRESS_DB_PASSWORD
