@@ -1,9 +1,9 @@
 services:
   # MySQL Service
   - type: pserv
-    name: mysql-db
+    name: mysql
     env: docker
-    plan: free
+    plan: starter
     image: mysql:8.0
     command: --default-authentication-plugin=mysql_native_password --bind-address=0.0.0.0
     disk:
@@ -32,20 +32,32 @@ services:
     healthCheckPath: /
     envVars:
       - key: WORDPRESS_DB_HOST
-        value: mysql-db:3306
+        fromService:
+          type: pserv
+          name: mysql
+          property: host
       - key: WORDPRESS_DB_USER
-        value: wordpress
-      - key: WORDPRESS_DB_NAME
-        value: wordpress
+        fromService:
+          type: pserv
+          name: mysql
+          property: user
       - key: WORDPRESS_DB_PASSWORD
-        value: MySecurePass123!@#
+        fromService:
+          type: pserv
+          name: mysql
+          property: password
+      - key: WORDPRESS_DB_NAME
+        fromService:
+          type: pserv
+          name: mysql
+          property: database
       - key: WORDPRESS_DEBUG
         value: "1"
     disk:
       name: wordpress-data
-      mountPath: /var/www/html
+      mountPath: /var/www/html/wp-content
       sizeGB: 10
     domains:
       - espbot.onrender.com
     dependsOn:
-      - mysql-db
+      - mysql
