@@ -21,7 +21,7 @@ $db_name = getenv('WORDPRESS_DB_NAME');
 if (empty($db_host)) {
     // Try to get the private domain from Render's environment
     $private_domain = getenv('RENDER_SERVICE_DOMAIN');
-    $db_host = $private_domain ? $private_domain . ':3306' : 'mysql-db.svc.internal:3306';
+    $db_host = $private_domain ? $private_domain . ':3306' : 'mysql-db:3306';
 }
 if (empty($db_user)) $db_user = 'wordpress';
 if (empty($db_password)) $db_password = 'MySecurePass123!@#';
@@ -55,23 +55,41 @@ for ($i = 0; $i < $max_retries; $i++) {
         error_log("Attempt " . ($i + 1) . " to connect to MySQL");
         error_log("Connection params - Host: " . $host . ", Port: " . $port . ", User: " . $db_user . ", Database: " . $db_name);
         
-        $mysqli = new mysqli($host, $db_user, $db_password, $db_name, $port);
+        // Try different hostnames if the connection fails
+        $hostnames = [
+            $host,                    // Original hostname
+            $host . '.svc.internal',  // Render internal service domain
+            $host . '.internal',      // Alternative internal domain
+            'localhost'               // Local fallback
+        ];
         
-        if ($mysqli->connect_error) {
-            error_log("Failed to connect to MySQL: " . $mysqli->connect_error);
-            if ($i < $max_retries - 1) {
-                error_log("Waiting " . $retry_interval . " seconds before retry...");
-                sleep($retry_interval);
-                continue;
+        $connected = false;
+        foreach ($hostnames as $try_host) {
+            error_log("Trying hostname: " . $try_host);
+            try {
+                $mysqli = new mysqli($try_host, $db_user, $db_password, $db_name, $port);
+                if (!$mysqli->connect_error) {
+                    error_log("Successfully connected to MySQL using host: " . $try_host);
+                    $connected = true;
+                    $mysqli->close();
+                    break;
+                }
+                error_log("Failed to connect using host " . $try_host . ": " . $mysqli->connect_error);
+            } catch (Exception $e) {
+                error_log("Exception trying host " . $try_host . ": " . $e->getMessage());
             }
-        } else {
-            error_log("Successfully connected to MySQL");
-            $connected = true;
-            $mysqli->close();
+        }
+        
+        if ($connected) {
             break;
         }
+        
+        if ($i < $max_retries - 1) {
+            error_log("All connection attempts failed. Waiting " . $retry_interval . " seconds before retry...");
+            sleep($retry_interval);
+        }
     } catch (Exception $e) {
-        error_log("Exception while connecting to MySQL: " . $e->getMessage());
+        error_log("Exception in connection loop: " . $e->getMessage());
         if ($i < $max_retries - 1) {
             sleep($retry_interval);
         }

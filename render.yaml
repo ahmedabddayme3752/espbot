@@ -30,7 +30,7 @@ services:
     healthCheckPath: /
     envVars:
       - key: WORDPRESS_DB_HOST
-        value: ${mysql-db.PRIVATE_DOMAIN}:3306
+        value: mysql-db:3306
       - key: WORDPRESS_DB_USER
         value: wordpress
       - key: WORDPRESS_DB_PASSWORD
