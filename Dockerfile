@@ -7,6 +7,7 @@ RUN apt-get update && apt-get install -y \
     libfreetype6-dev \
     zip \
     unzip \
+    wget \
     && docker-php-ext-configure gd --with-freetype --with-jpeg \
     && docker-php-ext-install gd mysqli pdo pdo_mysql
 
@@ -24,7 +25,12 @@ RUN echo "<Directory /var/www/html/>\n\
 # Set working directory
 WORKDIR /var/www/html
 
-# Copy WordPress files
+# Download and extract WordPress
+RUN wget https://wordpress.org/latest.tar.gz && \
+    tar -xzf latest.tar.gz --strip-components=1 && \
+    rm latest.tar.gz
+
+# Copy our custom content
 COPY . /var/www/html/
 
 # Set permissions

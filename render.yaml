@@ -11,17 +11,14 @@ services:
       mountPath: /var/lib/mysql
       sizeGB: 10
     envVars:
+      - key: MYSQL_ROOT_PASSWORD
+        generateValue: true
       - key: MYSQL_DATABASE
         value: wordpress
       - key: MYSQL_USER
         value: wordpress
       - key: MYSQL_PASSWORD
-        value: MySecurePass123!@#
-      - key: MYSQL_ROOT_PASSWORD
         generateValue: true
-    ports:
-      - port: 3306
-        expose: true
 
   # WordPress Service
   - type: web
@@ -37,20 +34,14 @@ services:
           name: mysql
           property: host
       - key: WORDPRESS_DB_USER
-        fromService:
-          type: pserv
-          name: mysql
-          property: user
+        value: wordpress
       - key: WORDPRESS_DB_PASSWORD
         fromService:
           type: pserv
           name: mysql
-          property: password
+          envVarKey: MYSQL_PASSWORD
       - key: WORDPRESS_DB_NAME
-        fromService:
-          type: pserv
-          name: mysql
-          property: database
+        value: wordpress
       - key: WORDPRESS_DEBUG
         value: "1"
     disk:
